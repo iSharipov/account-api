@@ -1,19 +1,20 @@
 Spring Boot, Spring MVC, Data JPA, H2
 Три таблицы:
-1.	Person – клиенты
-2.	Account – счета
+1.	Account – счета
+2.	Transaction – проводки по счетам
 3.	Join таблица
 
-Исходя из задания можно было сделать просто таблицу со счетами без использования клиента и поиска среди его счетов, переданного как параметр, но хотелось попробовать связи таблиц через JPA.
-
 Три API:
+    /api
 1.	/increase-balance – увеличение баланса счета клиента
-Обязательные POST параметры: personIdTo, accountNumberTo, sum
+Обязательные POST параметры: accountTo, amount
 2.	/reduce-balance – уменьшение баланса счета клинента
-Обязательные POST параметры: personIdFrom, accountNumberFrom, sum.
-3.	/transaction – перевод с одного счета на другой
-Обязательные POST параметры: personIdFrom, accountNumberFrom, accountNumberTo, sum
+Обязательные POST параметры: accountFrom, amount.
+3.	/transfer – перевод с одного счета на другой
+Обязательные POST параметры: accountFrom, accountTo, amount
 
+Интеграционные тесты: один тест на один метод
+**Валидация входных параметров** (количество символов, число или нет, есть ли такой счет) **не сделана** 
 
-Пример формата ответа: {"renewedAmount":null,"messages":"Transaction Sum: 900 greater than balance: 100.00","status":"ERROR"}
+Пример формата ответа: {"renewedAmount":null,"messages":["Transaction Sum: 900 greater than balance: 100.00"],"status":"ERROR"}
 
