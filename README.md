@@ -15,5 +15,5 @@ Spring Boot, Spring MVC, Data JPA, H2
 Обязательные POST параметры: personIdFrom, accountNumberFrom, accountNumberTo, sum
 
 
-Пример формата ответа: {"renewedAmount":null,"message":"Transaction Sum: 900 greater than balance: 100.00","status":"ERROR"}
+Пример формата ответа: {"renewedAmount":null,"messages":"Transaction Sum: 900 greater than balance: 100.00","status":"ERROR"}
 

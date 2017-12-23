@@ -2,10 +2,13 @@ package ru.sbrf.bh.accountapi.dto;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 public class TransactionResult implements Serializable {
     private BigDecimal renewedAmount;
-    private String message;
+    private Set<String> messages;
     private Status status;
 
 
@@ -17,12 +20,19 @@ public class TransactionResult implements Serializable {
         this.renewedAmount = renewedAmount;
     }
 
-    public String getMessage() {
-        return message;
+    public Set<String> getMessages() {
+        return messages;
     }
 
-    public void setMessage(String message) {
-        this.message = message;
+    public void setMessages(Set<String> messages) {
+        this.messages = messages;
+    }
+
+    public void addMessage(String message) {
+        if (messages == null) {
+            messages = new HashSet<>();
+        }
+        messages.add(message);
     }
 
     public Status getStatus() {

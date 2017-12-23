@@ -16,20 +16,13 @@ public class Account {
     @Column(name = "ACCOUNT__NUMBER")
     private String accountNumber;
 
-    @JoinTable(name = "PERSON_ACCOUNT",
-            joinColumns = @JoinColumn(name = "ACCOUNT_ID"),
-            inverseJoinColumns = @JoinColumn(name = "PERSON_ID"))
-    @ManyToOne
-    private Person person;
-
     @Column(name = "ACCOUNT_UUID")
     private String accountUuid;
 
     private BigDecimal amount;
 
-    public Account(String accountNumber, Person person) {
+    public Account(String accountNumber) {
         this.accountNumber = accountNumber;
-        this.person = person;
         this.accountUuid = UUID.randomUUID().toString();
         this.amount = BigDecimal.ZERO;
     }
@@ -47,10 +40,6 @@ public class Account {
 
     public String getAccountNumber() {
         return accountNumber;
-    }
-
-    public Person getPerson() {
-        return person;
     }
 
     public String getAccountUuid() {

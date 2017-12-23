@@ -1,12 +1,12 @@
 package ru.sbrf.bh.accountapi.service;
 
 import ru.sbrf.bh.accountapi.dto.TransactionResult;
-import ru.sbrf.bh.accountapi.vo.Transaction;
+import ru.sbrf.bh.accountapi.vo.Params;
 
 public interface AccountService {
-    TransactionResult increaseBalance(Transaction transaction);
+    TransactionResult increaseBalance(Params params);
 
-    TransactionResult reduceBalance(Transaction transaction);
+    TransactionResult reduceBalance(Params params);
 
-    TransactionResult accountToAccountTransaction(Transaction transaction);
+    TransactionResult accountToAccountTransaction(Params params);
 }

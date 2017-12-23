@@ -6,15 +6,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.sbrf.bh.accountapi.dto.TransactionResult;
 import ru.sbrf.bh.accountapi.entity.Account;
-import ru.sbrf.bh.accountapi.entity.Person;
 import ru.sbrf.bh.accountapi.repository.AccountRepository;
-import ru.sbrf.bh.accountapi.repository.PersonRepository;
-import ru.sbrf.bh.accountapi.vo.Transaction;
+import ru.sbrf.bh.accountapi.vo.Params;
 
 import javax.transaction.Transactional;
 import java.lang.invoke.MethodHandles;
 import java.math.BigDecimal;
-import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Set;
 
 import static ru.sbrf.bh.accountapi.dto.TransactionResult.Status.ERROR;
@@ -25,31 +23,27 @@ public class AccountServiceImpl implements AccountService {
     private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     @Autowired
-    private PersonRepository personRepository;
-    @Autowired
     private AccountRepository accountRepository;
 
     @Override
     @Transactional
-    public TransactionResult increaseBalance(Transaction transaction) {
+    public TransactionResult increaseBalance(Params params) {
         BigDecimal newAmount;
         TransactionResult result = new TransactionResult();
         result.setStatus(ERROR);
-        result.setMessage("Transaction Failed");
         try {
-            Person person = personRepository.getOne(Long.valueOf(transaction.getPersonIdTo()));
-            Account account = findAccountByPersonAndAccountNumber(person, transaction.getAccountNumberTo());
+            Account account = accountRepository.getAccountByAccountNumber(params.getAccountTo());
             if (account != null) {
-                newAmount = account.increaseAmount(new BigDecimal(transaction.getTransactionAmount()));
+                newAmount = account.increaseAmount(new BigDecimal(params.getAmount()));
                 accountRepository.save(account);
                 result.setRenewedAmount(newAmount);
                 result.setStatus(SUCCESS);
-                result.setMessage("Transaction Successful");
+                result.addMessage("Transaction Successful");
             } else {
-                result.setMessage("Account Not Found: " + transaction.getAccountNumberTo());
+                result.addMessage("Account Not Found: " + params.getAccountTo());
             }
         } catch (Exception e) {
-            result.setMessage(e.getMessage());
+            result.addMessage(e.getMessage());
             LOGGER.info(e.getMessage());
         }
         return result;
@@ -57,80 +51,64 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     @Transactional
-    public TransactionResult reduceBalance(Transaction transaction) {
+    public TransactionResult reduceBalance(Params params) {
         BigDecimal newAmount;
         TransactionResult result = new TransactionResult();
         result.setStatus(ERROR);
-        result.setMessage("Transaction Failed");
         try {
-            Person person = personRepository.getOne(Long.valueOf(transaction.getPersonIdFrom()));
-            Account account = findAccountByPersonAndAccountNumber(person, transaction.getAccountNumberFrom());
+            Account account = accountRepository.getAccountByAccountNumber(params.getAccountFrom());
             if (account != null) {
                 BigDecimal amount = account.getAmount();
-                if (isSufficientBalance(transaction, amount)) {
-                    newAmount = account.substractAmount(new BigDecimal(transaction.getTransactionAmount()));
+                if (isSufficientBalance(params, amount)) {
+                    newAmount = account.substractAmount(new BigDecimal(params.getAmount()));
                     accountRepository.save(account);
                     result.setRenewedAmount(newAmount);
                     result.setStatus(SUCCESS);
-                    result.setMessage("Transaction Successful");
+                    result.addMessage("Transaction Successful");
                 } else {
-                    result.setMessage("Transaction Sum: " + transaction.getTransactionAmount() + " greater than balance: " + amount);
+                    result.addMessage("Debit Sum: " + params.getAmount() + " greater than balance: " + amount);
                 }
             } else {
-                result.setMessage("Account Not Found: " + transaction.getAccountNumberFrom());
+                result.addMessage("Account Not Found: " + params.getAccountFrom());
             }
         } catch (Exception e) {
-            result.setMessage(e.getMessage());
+            result.addMessage(e.getMessage());
             LOGGER.info(e.getMessage());
         }
         return result;
     }
 
+    //Фактически этого метода может не быть в API,
+    //операции списания и зачисления могут быть вызваны непосредственно из прикладного кода
     @Override
     @Transactional
-    public TransactionResult accountToAccountTransaction(Transaction transaction) {
+    public TransactionResult accountToAccountTransaction(Params params) {
         TransactionResult result = new TransactionResult();
-        result.setStatus(ERROR);
-        try {
-            Person person = personRepository.getOne(Long.valueOf(transaction.getPersonIdFrom()));
-            Account accountFrom = findAccountByPersonAndAccountNumber(person, transaction.getAccountNumberFrom());
-            Account accountTo = accountRepository.getAccountByAccountNumber(transaction.getAccountNumberTo());
-            if (accountFrom != null && accountTo != null) {
-                BigDecimal amount = accountFrom.getAmount();
-                if (isSufficientBalance(transaction, amount)) {
-                    accountTo.increaseAmount(new BigDecimal(transaction.getTransactionAmount()));
-                    accountFrom.substractAmount(new BigDecimal(transaction.getTransactionAmount()));
-                    accountRepository.save(Arrays.asList(accountFrom, accountTo));
-                    result.setStatus(SUCCESS);
-                    result.setMessage("Transaction Successfull");
-                } else {
-                    result.setMessage("Transaction Sum: " + transaction.getTransactionAmount() + " greater than balance: " + amount);
+        TransactionResult increaseResult = increaseBalance(params);
+        TransactionResult reduceResult;
+        Set<String> messages = new HashSet<>();
+        if (increaseResult != null) {
+            if (increaseResult.getStatus() != null && increaseResult.getStatus() == SUCCESS) {
+                reduceResult = reduceBalance(params);
+                if (reduceResult != null) {
+                    if (reduceResult.getStatus() != null && reduceResult.getStatus() == SUCCESS) {
+                        result.setStatus(SUCCESS);
+                    } else {
+                        result.setStatus(ERROR);
+                    }
+                    messages.addAll(reduceResult.getMessages());
                 }
-            } else {
-                result.setMessage("AccountNumberFrom: " + accountFrom + " " + "AccountNumberTo: " + accountTo);
             }
-        } catch (Exception e) {
-            result.setMessage(e.getMessage());
-            LOGGER.info(e.getMessage());
+            messages.addAll(increaseResult.getMessages());
         }
+
+        result.setMessages(messages);
         return result;
     }
 
-    private boolean isSufficientBalance(Transaction transaction, BigDecimal amount) {
+    private boolean isSufficientBalance(Params params, BigDecimal amount) {
         return amount.compareTo(BigDecimal.ZERO) > 0
-                && (amount.compareTo(new BigDecimal(transaction.getTransactionAmount())) > 0
-                || amount.compareTo(new BigDecimal(transaction.getTransactionAmount())) == 0);
-    }
-
-    private Account findAccountByPersonAndAccountNumber(Person person, String accountNumber) {
-        Set<Account> accounts = person.getAccounts();
-        if (accounts != null && !accounts.isEmpty()) {
-            for (Account account : accounts) {
-                if (account.getAccountNumber().equals(accountNumber)) {
-                    return account;
-                }
-            }
-        }
-        return null;
+                && (amount.compareTo(new BigDecimal(params.getAmount())) > 0
+                || amount.compareTo(new BigDecimal(params.getAmount())) == 0);
     }
 }
