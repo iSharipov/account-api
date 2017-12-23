@@ -1,20 +1,22 @@
 package ru.sbrf.bh.accountapi.entity;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
 @Entity(name = "Account")
 @Table(name = "ACCOUNT")
-public class Account {
+public class Account implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "ACCOUNT_ID")
     private Long id;
 
-    @Column(name = "ACCOUNT__NUMBER")
+    @Column(name = "ACCOUNT__NUMBER", unique = true)
     private String accountNumber;
 
     @Column(name = "ACCOUNT_UUID")
@@ -75,5 +77,19 @@ public class Account {
         BigDecimal temp = this.amount.subtract(subtrahend);
         this.amount = new BigDecimal(temp.toString());
         return temp;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Account account = (Account) o;
+        return Objects.equals(accountNumber, account.accountNumber);
+    }
+
+    @Override
+    public int hashCode() {
+
+        return Objects.hash(accountNumber);
     }
 }

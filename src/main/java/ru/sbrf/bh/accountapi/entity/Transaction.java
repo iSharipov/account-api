@@ -4,11 +4,12 @@ import ru.sbrf.bh.accountapi.dto.TransactionResult;
 import ru.sbrf.bh.accountapi.enumeration.OperationType;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.Date;
 
 @Entity(name = "Transaction")
 @Table(name = "TRANSACTION")
-public class Transaction {
+public class Transaction implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "TRANSACTION_ID")

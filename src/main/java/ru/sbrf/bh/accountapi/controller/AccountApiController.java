@@ -11,6 +11,7 @@ import ru.sbrf.bh.accountapi.vo.Params;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 @RestController
+@RequestMapping("/api")
 public class AccountApiController {
 
     @Autowired
