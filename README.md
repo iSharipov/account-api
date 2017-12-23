@@ -5,7 +5,7 @@ Spring Boot, Spring MVC, Data JPA, H2
 3.	Join таблица
 
 Три API:
-    /api
+0.    /api
 1.	/increase-balance – увеличение баланса счета клиента
 Обязательные POST параметры: accountTo, amount
 2.	/reduce-balance – уменьшение баланса счета клинента
