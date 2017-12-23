@@ -36,8 +36,8 @@ public class AccountApiController {
                 .withAmount(amount).build());
     }
 
-    @RequestMapping(value = "/transaction", method = POST)
-    public TransactionResult transaction(
+    @RequestMapping(value = "/transfer", method = POST)
+    public TransactionResult transfer(
             @RequestParam(value = "accountFrom") String accountFrom,
             @RequestParam(value = "accountTo") String accountTo,
             @RequestParam(value = "amount") String amount) {
