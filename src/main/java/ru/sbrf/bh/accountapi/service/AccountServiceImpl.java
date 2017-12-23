@@ -6,7 +6,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.sbrf.bh.accountapi.dto.TransactionResult;
 import ru.sbrf.bh.accountapi.entity.Account;
+import ru.sbrf.bh.accountapi.entity.Transaction;
+import ru.sbrf.bh.accountapi.enumeration.OperationType;
 import ru.sbrf.bh.accountapi.repository.AccountRepository;
+import ru.sbrf.bh.accountapi.repository.TransactionRepository;
 import ru.sbrf.bh.accountapi.vo.Params;
 
 import javax.transaction.Transactional;
@@ -15,8 +18,10 @@ import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Set;
 
-import static ru.sbrf.bh.accountapi.dto.TransactionResult.Status.ERROR;
-import static ru.sbrf.bh.accountapi.dto.TransactionResult.Status.SUCCESS;
+import static ru.sbrf.bh.accountapi.enumeration.OperationStatus.ERROR;
+import static ru.sbrf.bh.accountapi.enumeration.OperationStatus.SUCCESS;
+import static ru.sbrf.bh.accountapi.enumeration.OperationType.INCREASE;
+import static ru.sbrf.bh.accountapi.enumeration.OperationType.REDUCE;
 
 @Service
 public class AccountServiceImpl implements AccountService {
@@ -24,6 +29,8 @@ public class AccountServiceImpl implements AccountService {
 
     @Autowired
     private AccountRepository accountRepository;
+    @Autowired
+    private TransactionRepository transactionRepository;
 
     @Override
     @Transactional
@@ -31,8 +38,9 @@ public class AccountServiceImpl implements AccountService {
         BigDecimal newAmount;
         TransactionResult result = new TransactionResult();
         result.setStatus(ERROR);
+        Account account = null;
         try {
-            Account account = accountRepository.getAccountByAccountNumber(params.getAccountTo());
+            account = accountRepository.getAccountByAccountNumber(params.getAccountTo());
             if (account != null) {
                 newAmount = account.increaseAmount(new BigDecimal(params.getAmount()));
                 accountRepository.save(account);
@@ -46,6 +54,7 @@ public class AccountServiceImpl implements AccountService {
             result.addMessage(e.getMessage());
             LOGGER.info(e.getMessage());
         }
+        saveTransaction(account, result, INCREASE, params.getAmount());
         return result;
     }
 
@@ -55,8 +64,9 @@ public class AccountServiceImpl implements AccountService {
         BigDecimal newAmount;
         TransactionResult result = new TransactionResult();
         result.setStatus(ERROR);
+        Account account = null;
         try {
-            Account account = accountRepository.getAccountByAccountNumber(params.getAccountFrom());
+            account = accountRepository.getAccountByAccountNumber(params.getAccountFrom());
             if (account != null) {
                 BigDecimal amount = account.getAmount();
                 if (isSufficientBalance(params, amount)) {
@@ -75,7 +85,19 @@ public class AccountServiceImpl implements AccountService {
             result.addMessage(e.getMessage());
             LOGGER.info(e.getMessage());
         }
+        saveTransaction(account, result, REDUCE, params.getAmount());
         return result;
+    }
+
+    private void saveTransaction(Account account, TransactionResult result, OperationType type, String amount) {
+        if (account != null) {
+            try {
+                transactionRepository.save(new Transaction(account, type, result, amount));
+            } catch (Exception e) {
+                result.setStatus(ERROR);
+                result.addMessage("Error while saving transaction");
+            }
+        }
     }
 
     //Фактически этого метода может не быть в API,

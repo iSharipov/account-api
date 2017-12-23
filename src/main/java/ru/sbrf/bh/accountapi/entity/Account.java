@@ -2,6 +2,7 @@ package ru.sbrf.bh.accountapi.entity;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
+import java.util.Set;
 import java.util.UUID;
 
 @Entity(name = "Account")
@@ -20,6 +21,12 @@ public class Account {
     private String accountUuid;
 
     private BigDecimal amount;
+
+    @JoinTable(name = "ACCOUNT_TRANSACTION",
+            joinColumns = @JoinColumn(name = "ACCOUNT_ID"),
+            inverseJoinColumns = @JoinColumn(name = "TRANSACTION_ID"))
+    @OneToMany
+    private Set<Transaction> transactions;
 
     public Account(String accountNumber) {
         this.accountNumber = accountNumber;
@@ -48,6 +55,14 @@ public class Account {
 
     public BigDecimal getAmount() {
         return amount;
+    }
+
+    public Set<Transaction> getTransactions() {
+        return transactions;
+    }
+
+    public void setTransactions(Set<Transaction> transactions) {
+        this.transactions = transactions;
     }
 
     public BigDecimal increaseAmount(BigDecimal augend) {

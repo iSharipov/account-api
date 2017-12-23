@@ -1,15 +1,16 @@
 package ru.sbrf.bh.accountapi.dto;
 
+import ru.sbrf.bh.accountapi.enumeration.OperationStatus;
+
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
 public class TransactionResult implements Serializable {
     private BigDecimal renewedAmount;
     private Set<String> messages;
-    private Status status;
+    private OperationStatus status;
 
 
     public BigDecimal getRenewedAmount() {
@@ -35,17 +36,11 @@ public class TransactionResult implements Serializable {
         messages.add(message);
     }
 
-    public Status getStatus() {
+    public OperationStatus getStatus() {
         return status;
     }
 
-    public void setStatus(Status status) {
+    public void setStatus(OperationStatus status) {
         this.status = status;
     }
-
-    public enum Status {
-        SUCCESS,
-        ERROR
-    }
 }
-
