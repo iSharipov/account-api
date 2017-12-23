@@ -8,5 +8,5 @@ public interface AccountService {
 
     TransactionResult reduceBalance(Params params);
 
-    TransactionResult accountToAccountTransaction(Params params);
+    TransactionResult transfer(Params params);
 }

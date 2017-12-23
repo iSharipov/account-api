@@ -104,7 +104,7 @@ public class AccountServiceImpl implements AccountService {
     //операции списания и зачисления могут быть вызваны непосредственно из прикладного кода
     @Override
     @Transactional
-    public TransactionResult accountToAccountTransaction(Params params) {
+    public TransactionResult transfer(Params params) {
         TransactionResult result = new TransactionResult();
         TransactionResult increaseResult = increaseBalance(params);
         TransactionResult reduceResult;

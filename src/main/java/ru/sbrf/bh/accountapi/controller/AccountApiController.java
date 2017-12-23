@@ -41,7 +41,7 @@ public class AccountApiController {
             @RequestParam(value = "accountFrom") String accountFrom,
             @RequestParam(value = "accountTo") String accountTo,
             @RequestParam(value = "amount") String amount) {
-        return accountService.accountToAccountTransaction(new Params.Builder()
+        return accountService.transfer(new Params.Builder()
                 .withAccountFrom(accountFrom)
                 .withAccountTo(accountTo)
                 .withAmount(amount).build());
