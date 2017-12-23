@@ -29,7 +29,6 @@ import static ru.sbrf.bh.accountapi.enumeration.OperationStatus.SUCCESS;
 @SpringBootTest(
         webEnvironment = WebEnvironment.RANDOM_PORT,
         classes = AccountApiApplication.class)
-//@WebMvcTest(value = AccountApiController.class)
 @AutoConfigureMockMvc
 @TestPropertySource(
         locations = "classpath:application-integrationtest.properties")
@@ -79,7 +78,7 @@ public class AccountApiControllerTest {
 
     @Test
     public void transaction() throws Exception {
-        mvc.perform(post("/api/transaction")
+        mvc.perform(post("/api/transfer")
                 .contentType(MediaType.APPLICATION_JSON)
                 .param("accountTo", secondAccount)
                 .param("accountFrom", firstAccount)
