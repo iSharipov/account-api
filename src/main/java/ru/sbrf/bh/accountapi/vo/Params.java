@@ -11,6 +11,18 @@ public final class Params {
         this.amount = builder.amount;
     }
 
+    public String getAccountTo() {
+        return accountTo;
+    }
+
+    public String getAccountFrom() {
+        return accountFrom;
+    }
+
+    public String getAmount() {
+        return amount;
+    }
+
     public static final class Builder {
         private String accountTo;
         private String accountFrom;
@@ -38,17 +50,5 @@ public final class Params {
         public Params build() {
             return new Params(this);
         }
-    }
-
-    public String getAccountTo() {
-        return accountTo;
-    }
-
-    public String getAccountFrom() {
-        return accountFrom;
-    }
-
-    public String getAmount() {
-        return amount;
     }
 }
