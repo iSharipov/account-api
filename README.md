@@ -15,6 +15,7 @@ _Spring Boot, Spring MVC, Data JPA, H2_
 Обязательные POST параметры: accountFrom, accountTo, amount
 
 **Интеграционные тесты:** один тест на один метод
+
 **Валидация входных параметров:** (количество символов, число или нет, есть ли такой счет) **не сделана** 
 
 **Пример формата ответа:** {"renewedAmount":null,"messages":["Transaction Sum: 900 greater than balance: 100.00"],"status":"ERROR"}
