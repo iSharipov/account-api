@@ -34,7 +34,7 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     @Transactional
-    public TransactionResult increaseBalance(Params params) {
+    public synchronized TransactionResult increaseBalance(Params params) {
         BigDecimal newAmount;
         TransactionResult result = new TransactionResult();
         result.setStatus(ERROR);
@@ -60,7 +60,7 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     @Transactional
-    public TransactionResult reduceBalance(Params params) {
+    public synchronized TransactionResult reduceBalance(Params params) {
         BigDecimal newAmount;
         TransactionResult result = new TransactionResult();
         result.setStatus(ERROR);
@@ -104,7 +104,7 @@ public class AccountServiceImpl implements AccountService {
     //операции списания и зачисления могут быть вызваны непосредственно из прикладного кода
     @Override
     @Transactional
-    public TransactionResult transfer(Params params) {
+    public synchronized TransactionResult transfer(Params params) {
         TransactionResult result = new TransactionResult();
         TransactionResult increaseResult = increaseBalance(params);
         TransactionResult reduceResult;
