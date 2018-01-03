@@ -59,24 +59,16 @@ public class Account implements Serializable {
         return amount;
     }
 
+    public void setAmount(BigDecimal amount) {
+        this.amount = amount;
+    }
+
     public Set<Transaction> getTransactions() {
         return transactions;
     }
 
     public void setTransactions(Set<Transaction> transactions) {
         this.transactions = transactions;
-    }
-
-    public BigDecimal increaseAmount(BigDecimal augend) {
-        BigDecimal temp = this.amount.add(augend);
-        this.amount = new BigDecimal(temp.toString());
-        return temp;
-    }
-
-    public BigDecimal substractAmount(BigDecimal subtrahend) {
-        BigDecimal temp = this.amount.subtract(subtrahend);
-        this.amount = new BigDecimal(temp.toString());
-        return temp;
     }
 
     @Override
@@ -89,7 +81,6 @@ public class Account implements Serializable {
 
     @Override
     public int hashCode() {
-
         return Objects.hash(accountNumber);
     }
 }

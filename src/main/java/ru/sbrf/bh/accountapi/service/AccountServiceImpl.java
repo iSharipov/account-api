@@ -31,6 +31,8 @@ public class AccountServiceImpl implements AccountService {
     private AccountRepository accountRepository;
     @Autowired
     private TransactionRepository transactionRepository;
+    @Autowired
+    private CalculationService calculationService;
 
     @Override
     @Transactional
@@ -42,7 +44,8 @@ public class AccountServiceImpl implements AccountService {
         try {
             account = accountRepository.getAccountByAccountNumber(params.getAccountTo());
             if (account != null) {
-                newAmount = account.increaseAmount(new BigDecimal(params.getAmount()));
+                newAmount = calculationService.increaseAmount(account.getAmount(), new BigDecimal(params.getAmount()));
+                account.setAmount(newAmount);
                 accountRepository.save(account);
                 result.setRenewedAmount(newAmount);
                 result.setStatus(SUCCESS);
@@ -69,8 +72,9 @@ public class AccountServiceImpl implements AccountService {
             account = accountRepository.getAccountByAccountNumber(params.getAccountFrom());
             if (account != null) {
                 BigDecimal amount = account.getAmount();
-                if (isSufficientBalance(params, amount)) {
-                    newAmount = account.substractAmount(new BigDecimal(params.getAmount()));
+                if (calculationService.isSufficientBalance(new BigDecimal(params.getAmount()), amount)) {
+                    newAmount = calculationService.substractAmount(account.getAmount(), new BigDecimal(params.getAmount()));
+                    account.setAmount(newAmount);
                     accountRepository.save(account);
                     result.setRenewedAmount(newAmount);
                     result.setStatus(SUCCESS);
@@ -126,11 +130,5 @@ public class AccountServiceImpl implements AccountService {
 
         result.setMessages(messages);
         return result;
-    }
-
-    private boolean isSufficientBalance(Params params, BigDecimal amount) {
-        return amount.compareTo(BigDecimal.ZERO) > 0
-                && (amount.compareTo(new BigDecimal(params.getAmount())) > 0
-                || amount.compareTo(new BigDecimal(params.getAmount())) == 0);
     }
 }

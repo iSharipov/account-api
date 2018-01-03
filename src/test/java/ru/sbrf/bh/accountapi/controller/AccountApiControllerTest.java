@@ -49,7 +49,7 @@ public class AccountApiControllerTest {
     @Before
     public void setUp() {
         Account account1 = new Account(firstAccount);
-        account1.increaseAmount(new BigDecimal(1000));
+        account1.setAmount(new BigDecimal(1000));
         Account account2 = new Account(secondAccount);
         accountRepository.save(Arrays.asList(account1, account2));
     }
